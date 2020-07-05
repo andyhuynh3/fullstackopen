@@ -2,7 +2,7 @@ import React from 'react';
 
 const Person = ({ person }) => {
 	return (
-		<p key={person['name']}>
+		<p key={person['id']}>
 			{person['name']} {person['phone']}
 		</p>
 	);
