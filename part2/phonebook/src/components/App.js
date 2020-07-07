@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Filter from './Filter';
 import Persons from './Persons';
 import PersonForm from './PersonForm';
-import axios from 'axios';
+import personService from '../services/person';
 
 const App = () => {
 	const [persons, setPersons] = useState([]);
@@ -16,13 +16,17 @@ const App = () => {
 
 	const handleAdd = (event) => {
 		event.preventDefault();
-		if (persons.map((person) => person.name).includes(newName)) {
-			alert(`${newName} is already added to phonebook`);
+		const existingPerson = persons.find((person) => person.name === newName);
+		if (existingPerson) {
+			handleUpdate(existingPerson);
 			return;
 		}
-		setPersons([...persons, { name: newName, phone: newNumber }]);
-		setNewName('');
-		setNewNumber('');
+		const newPerson = { name: newName, phone: newNumber };
+		personService.add(newPerson).then((returnedPerson) => {
+			setPersons([...persons, returnedPerson]);
+			setNewName('');
+			setNewNumber('');
+		});
 	};
 
 	const handleNumberChange = (event) => {
@@ -34,12 +38,41 @@ const App = () => {
 	};
 
 	const hook = () => {
-		axios.get('http://localhost:3001/persons').then((response) => {
-			setPersons(response.data);
+		personService.getAll().then((initialPersons) => {
+			setPersons(initialPersons);
 		});
 	};
 
 	useEffect(hook, []);
+
+	const handleDelete = (personToDelete) => {
+		window.confirm(`Delete ${personToDelete.name} ?`);
+		personService.del(personToDelete.id);
+		const newPersonsToDisplay = [];
+		for (let person of persons) {
+			if (person.id !== personToDelete.id) {
+				newPersonsToDisplay.push(person);
+			}
+		}
+		setPersons(newPersonsToDisplay);
+	};
+
+	const handleUpdate = (personToUpdate) => {
+		window.confirm(
+			`${personToUpdate.name} is already added to phonebook, replace the old number with a new one?`
+		);
+		const updatedPerson = { ...personToUpdate, phone: newNumber };
+		personService
+			.update(personToUpdate.id, updatedPerson)
+			.then((returnedPerson) => {
+				console.log('Updated person...');
+				setPersons(
+					persons.map((person) =>
+						person.id !== personToUpdate.id ? person : returnedPerson
+					)
+				);
+			});
+	};
 
 	const personsToDisplay =
 		filter === ''
@@ -59,7 +92,7 @@ const App = () => {
 				handleAdd={handleAdd}
 			/>
 			<h3>Numbers</h3>
-			<Persons persons={personsToDisplay} />
+			<Persons persons={personsToDisplay} handleDelete={handleDelete} />
 		</div>
 	);
 };
