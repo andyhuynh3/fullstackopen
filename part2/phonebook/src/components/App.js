@@ -3,12 +3,15 @@ import Filter from './Filter';
 import Persons from './Persons';
 import PersonForm from './PersonForm';
 import personService from '../services/person';
+import Alert from './Alert';
+import '../index.css';
 
 const App = () => {
 	const [persons, setPersons] = useState([]);
 	const [newName, setNewName] = useState('');
 	const [newNumber, setNewNumber] = useState('');
 	const [filter, setFilter] = useState('');
+	const [alert, setAlert] = useState(null);
 
 	const handleNameChange = (event) => {
 		setNewName(event.target.value);
@@ -27,6 +30,10 @@ const App = () => {
 			setNewName('');
 			setNewNumber('');
 		});
+		setAlert({ message: `Added ${newName}`, className: 'success' });
+		setTimeout(() => {
+			setAlert(null);
+		}, 3000);
 	};
 
 	const handleNumberChange = (event) => {
@@ -47,7 +54,15 @@ const App = () => {
 
 	const handleDelete = (personToDelete) => {
 		window.confirm(`Delete ${personToDelete.name} ?`);
-		personService.del(personToDelete.id);
+		personService.del(personToDelete.id).catch((error) => {
+			setAlert({
+				message: `Information of ${personToDelete.name} has already been removed from server`,
+				className: 'error'
+			});
+			setTimeout(() => {
+				setAlert(null);
+			}, 3000);
+		});
 		const newPersonsToDisplay = [];
 		for (let person of persons) {
 			if (person.id !== personToDelete.id) {
@@ -82,6 +97,7 @@ const App = () => {
 	return (
 		<div>
 			<h2>Phonebook</h2>
+			<Alert alert={alert} />
 			<Filter handleFilter={handleFilter} filter={filter} />
 			<h3>add a new</h3>
 			<PersonForm
