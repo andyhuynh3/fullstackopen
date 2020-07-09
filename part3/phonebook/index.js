@@ -16,22 +16,22 @@ app.use(morgan('common'));
 let persons = [
 	{
 		name: 'Arto Hellas',
-		number: '040-123456',
+		phone: '040-123456',
 		id: 1
 	},
 	{
 		name: 'Ada Lovelac',
-		number: '39-44-532532',
+		phone: '39-44-532532',
 		id: 2
 	},
 	{
 		name: 'Dan Abramov',
-		number: '12-43-234345',
+		phone: '12-43-234345',
 		id: 3
 	},
 	{
 		name: 'Mark Poppendieck',
-		number: '39-23-6423122',
+		phone: '39-23-6423122',
 		id: 4
 	}
 ];
@@ -66,7 +66,7 @@ app.delete('/api/persons/:id', (request, response) => {
 
 app.post('/api/persons', (request, response) => {
 	const body = request.body;
-	if (!body.name || !body.number) {
+	if (!body.name || !body.phone) {
 		return response.status(400).json({
 			error: 'Must supply name and number to request'
 		});
@@ -81,11 +81,21 @@ app.post('/api/persons', (request, response) => {
 
 	const person = {
 		name: body.name,
-		number: body.number,
+		phone: body.phone,
 		id: Math.floor(Math.random() * 10000000)
 	};
 
 	persons = persons.concat(person);
+	response.json(person);
+});
+
+app.put('/api/persons/:id', (request, response) => {
+	const body = request.body;
+	const personToUpdateIndex = persons.findIndex(
+		(person) => person.name === body.name
+	);
+	persons[personToUpdateIndex].phone = body.phone;
+	const person = persons[personToUpdateIndex];
 	response.json(person);
 });
 
