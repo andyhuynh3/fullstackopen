@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:ui": "rm -rf build && cd ../../part2/phonebook/ && yarn build --prod && cp -r build ../../part3/phonebook",
+    "deploy": "git push heroku master"
   },
   "author": "Andy Huynh",
   "license": "MIT",
@@ -21,6 +23,7 @@
     "prettier": "^2.0.5"
   },
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^4.17.1",
     "morgan": "^1.10.0"
   }
