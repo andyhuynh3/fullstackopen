@@ -48,7 +48,7 @@ app.delete('/api/persons/:id', (request, response, next) => {
 		.catch((error) => next(error));
 });
 
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
 	const body = request.body;
 	if (!body.name || !body.phone) {
 		return response.status(400).json({
@@ -61,27 +61,38 @@ app.post('/api/persons', (request, response) => {
 		phone: body.phone
 	});
 
-	person.save().then((savedPerson) => {
-		response.json(savedPerson);
-	});
+	person
+		.save()
+		.then((savedPerson) => {
+			response.json(savedPerson);
+		})
+		.catch((error) => next(error));
 });
 
-app.put('/api/persons/:id', (request, response) => {
+app.put('/api/persons/:id', (request, response, next) => {
 	const person = {
 		phone: request.body.phone
 	};
-	Person.findByIdAndUpdate(request.params.id, person, { new: true })
+	Person.findByIdAndUpdate(request.params.id, person, {
+		new: true,
+		runValidators: true
+	})
 		.then((updatedPerson) => {
 			response.json(updatedPerson);
 		})
 		.catch((error) => next(error));
 });
 
-const errorHandler = (error, _request, response, _next) => {
+const errorHandler = (error, _request, response, next) => {
 	console.error(error.message);
 	if (error.name === 'CastError') {
 		return response.status(400).send({ error: 'malformatted id' });
+	} else if (error.code === 11000 && error.name === 'MongoError') {
+		return response.status(400).send({ error: 'duplicate key error' });
+	} else if (error.name === 'ValidationError') {
+		return response.status(400).send({ error: error.message });
 	}
+	return next(error);
 };
 
 app.use(errorHandler);

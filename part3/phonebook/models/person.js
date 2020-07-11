@@ -1,5 +1,7 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
+mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
 
 url = process.env.MONGODB_URI;
 
@@ -13,8 +15,16 @@ mongoose
 	});
 
 const personSchema = new mongoose.Schema({
-	name: String,
-	phone: String
+	name: {
+		type: String,
+		unique: true,
+		index: true,
+		minlength: 3
+	},
+	phone: {
+		type: String,
+		minlength: 8
+	}
 });
 
 personSchema.set('toJSON', {
