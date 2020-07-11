@@ -13,6 +13,13 @@ const App = () => {
 	const [filter, setFilter] = useState('');
 	const [alert, setAlert] = useState(null);
 
+	const setAlertHelper = (alertState) => {
+		setAlert(alertState);
+		setTimeout(() => {
+			setAlert(null);
+		}, 3000);
+	};
+
 	const handleNameChange = (event) => {
 		setNewName(event.target.value);
 	};
@@ -25,12 +32,20 @@ const App = () => {
 			return;
 		}
 		const newPerson = { name: newName, phone: newNumber };
-		personService.add(newPerson).then((returnedPerson) => {
-			setPersons([...persons, returnedPerson]);
-			setNewName('');
-			setNewNumber('');
-		});
-		setAlert({ message: `Added ${newName}`, className: 'success' });
+		personService
+			.add(newPerson)
+			.then((returnedPerson) => {
+				setPersons([...persons, returnedPerson]);
+				setNewName('');
+				setNewNumber('');
+			})
+			.catch((error) => {
+				setAlertHelper({
+					message: error.response.data.error,
+					className: 'error'
+				});
+			});
+		setAlertHelper({ message: `Added ${newName}`, className: 'success' });
 		setTimeout(() => {
 			setAlert(null);
 		}, 3000);
@@ -54,15 +69,20 @@ const App = () => {
 
 	const handleDelete = (personToDelete) => {
 		window.confirm(`Delete ${personToDelete.name} ?`);
-		personService.del(personToDelete.id).catch((error) => {
-			setAlert({
-				message: `Information of ${personToDelete.name} has already been removed from server`,
-				className: 'error'
+		personService
+			.del(personToDelete.id)
+			.then((_response) => {
+				setAlertHelper({
+					message: `Deleted ${personToDelete.name}`,
+					className: 'success'
+				});
+			})
+			.catch((_error) => {
+				setAlertHelper({
+					message: `Information of ${personToDelete.name} has already been removed from server`,
+					className: 'error'
+				});
 			});
-			setTimeout(() => {
-				setAlert(null);
-			}, 3000);
-		});
 		const newPersonsToDisplay = [];
 		for (let person of persons) {
 			if (person.id !== personToDelete.id) {
@@ -80,12 +100,21 @@ const App = () => {
 		personService
 			.update(personToUpdate.id, updatedPerson)
 			.then((returnedPerson) => {
-				console.log('Updated person...');
 				setPersons(
 					persons.map((person) =>
 						person.id !== personToUpdate.id ? person : returnedPerson
 					)
 				);
+				setAlertHelper({
+					message: `Updated ${returnedPerson.name} phone`,
+					className: 'success'
+				});
+			})
+			.catch((error) => {
+				setAlertHelper({
+					message: error.response.data.error,
+					className: 'error'
+				});
 			});
 	};
 
