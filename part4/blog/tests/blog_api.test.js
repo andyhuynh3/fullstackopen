@@ -81,6 +81,43 @@ test('POST returns 400 if title and url properties missing', async () => {
     .expect(400);
 });
 
+describe('deletion of a note', () => {
+  test('succeeds with status code 204 if id is valid', async () => {
+    const blogToDelete = helpers.initialBlogPosts[0];
+    await api.delete(`/api/blogs/${blogToDelete._id}`).expect(204);
+    const blogs = await helpers.blogsInDb();
+    expect(blogs.length).toEqual(helpers.initialBlogPosts.length - 1);
+    const ids = blogs.map((blog) => blog.id);
+    expect(ids).not.toContain(blogToDelete._id);
+  });
+
+  test('fails with status code 404 if id is not valid', async () => {
+    await api.delete('/api/blogs/invalid_id').expect(404);
+  });
+});
+
+describe('update of a note', () => {
+  test('succeeds with status code 200 if id is valid', async () => {
+    const blogToUpdate = helpers.initialBlogPosts[0];
+    const updatedTitle = 'React patterns v2';
+    const updatedContent = { title: updatedTitle };
+    let response = await api
+      .put(`/api/blogs/${blogToUpdate._id}`)
+      .send(updatedContent)
+      .expect(200);
+    expect(response.body.title).toEqual(updatedTitle);
+    const invalidProperty = { invalid: 'this is an invalid property' };
+    response = await api
+      .put(`/api/blogs/${blogToUpdate._id}`)
+      .send(invalidProperty)
+      .expect(200);
+  });
+
+  test('fails with status code 404 if id is invalid', async () => {
+    await api.put('/api/blogs/invalid_id').send({ title: 'new title' }).expect(404);
+  });
+});
+
 afterAll(() => {
   mongoose.connection.close();
 });
