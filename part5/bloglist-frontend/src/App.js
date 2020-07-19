@@ -78,16 +78,60 @@ const App = () => {
     setUser(null);
   };
 
+  const handleLike = (blog) => async () => {
+    const {
+      id, likes, author, title, url, user,
+    } = blog;
+    const updatedBlog = {
+      user: user.id,
+      likes: likes + 1,
+      author,
+      title,
+      url,
+    };
+    const returnedBlog = await blogService.update(id, updatedBlog);
+    const updatedBlogs = blogs.map((b) => (b.id !== id ? b : returnedBlog));
+    setBlogs(updatedBlogs);
+  };
+
+  const handleDelete = (blog) => async () => {
+    // eslint-disable-next-line no-alert
+    window.confirm(`Remove blog ${blog.title} by ${blog.author}?`);
+    const { id } = blog;
+    const response = await blogService.del(id, user.token);
+    console.log(response.json);
+    const remainingBlogs = blogs.filter((b) => b.id !== id);
+    setBlogs(remainingBlogs);
+  };
+
+  const removeButton = (blog) => () => {
+    try {
+      if (user.username === blog.user.username) {
+        return (
+          <button type="submit" onClick={handleDelete(blog)}>remove</button>
+        );
+      }
+    } catch (err) {
+      return <></>;
+    }
+  };
+
   const blogFormRef = useRef();
+
+  const addBlogBase = async (blog) => {
+    const returnedBlog = await blogService.create(blog, user.token);
+    setBlogs([...blogs, returnedBlog]);
+    setNotificationHelper(
+      `a new blog ${returnedBlog.title} by ${returnedBlog.author} added`,
+      'success',
+    );
+    blogFormRef.current.toggleVisibility();
+  };
 
   const newBlogForm = () => (
     <Togglable buttonLabel="add new" ref={blogFormRef}>
       <BlogForm
-        blogs={blogs}
-        setBlogs={setBlogs}
-        setNotificationHelper={setNotificationHelper}
-        token={user.token}
-        blogFormRef={blogFormRef}
+        addBlogBase={addBlogBase}
       />
     </Togglable>
   );
@@ -139,9 +183,8 @@ const App = () => {
         <Blog
           key={blog.id}
           blog={blog}
-          blogs={blogs}
-          setBlogs={setBlogs}
-          user={user}
+          handleLike={handleLike(blog)}
+          removeButton={removeButton(blog)}
         />
       ))}
     </div>

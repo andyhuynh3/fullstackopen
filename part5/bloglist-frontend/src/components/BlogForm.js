@@ -1,14 +1,10 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import blogService from '../services/blogs';
 
-const BlogForm = (props) => {
+const BlogForm = ({ addBlogBase }) => {
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const [url, setUrl] = useState('');
-  const {
-    blogs, setBlogs, setNotificationHelper, token, blogFormRef,
-  } = props;
 
   const handleTitleChange = ({ target }) => {
     setTitle(target.value);
@@ -24,18 +20,10 @@ const BlogForm = (props) => {
 
   const addBlog = async (event) => {
     event.preventDefault();
-    const blog = { title, author, url };
-    console.log(token);
-    const returnedBlog = await blogService.create(blog, token);
-    setBlogs([...blogs, returnedBlog]);
-    setNotificationHelper(
-      `a new blog ${returnedBlog.title} by ${returnedBlog.author} added`,
-      'success',
-    );
+    await addBlogBase({ title, author, url });
     setTitle('');
     setAuthor('');
     setUrl('');
-    blogFormRef.current.toggleVisibility();
   };
 
   return (
@@ -43,24 +31,30 @@ const BlogForm = (props) => {
       <h2>create new</h2>
       <form onSubmit={addBlog}>
         <div>
-          title:
+          <label htmlFor="title">title:</label>
           <input
+            name="title"
+            id="title"
             type="text"
             value={title}
             onChange={handleTitleChange}
           />
         </div>
         <div>
-          author:
+          <label htmlFor="author">author:</label>
           <input
+            name="author"
+            id="author"
             type="text"
             value={author}
             onChange={handleAuthorChange}
           />
         </div>
         <div>
-          url:
+          <label htmlFor="url">url:</label>
           <input
+            name="url"
+            id="url"
             type="text"
             value={url}
             onChange={handleUrlChange}
@@ -73,13 +67,7 @@ const BlogForm = (props) => {
 };
 
 BlogForm.propTypes = {
-  // eslint-disable-next-line react/forbid-prop-types
-  blogs: PropTypes.array.isRequired,
-  setBlogs: PropTypes.func.isRequired,
-  setNotificationHelper: PropTypes.func.isRequired,
-  token: PropTypes.string.isRequired,
-  // eslint-disable-next-line react/forbid-prop-types
-  blogFormRef: PropTypes.object.isRequired,
+  addBlogBase: PropTypes.func.isRequired,
 };
 
 export default BlogForm;
