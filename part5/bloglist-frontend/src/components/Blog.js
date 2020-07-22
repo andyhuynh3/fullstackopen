@@ -27,18 +27,18 @@ const Blog = (props) => {
         {blog.title}
         {' '}
         {blog.author}
-        <button type="submit" onClick={toggleVisibility}>view</button>
+        <button id="view-button" type="submit" onClick={toggleVisibility}>view</button>
       </div>
       <div style={showWhenVisible} className="show">
         {blog.title}
         {' '}
         {blog.author}
-        <button type="submit" onClick={toggleVisibility}>hide</button>
+        <button id="hide-button" type="submit" onClick={toggleVisibility}>hide</button>
         <br />
         {blog.url}
         <br />
-        {blog.likes}
-        <button type="submit" onClick={handleLike}>like</button>
+        <div className="likes">{blog.likes}</div>
+        <button id="like-button" type="submit" onClick={handleLike}>like</button>
         <br />
         {blog.username}
         <br />

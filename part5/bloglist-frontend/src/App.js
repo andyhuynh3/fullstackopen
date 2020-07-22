@@ -108,7 +108,7 @@ const App = () => {
     try {
       if (user.username === blog.user.username) {
         return (
-          <button type="submit" onClick={handleDelete(blog)}>remove</button>
+          <button id="remove-button" type="submit" onClick={handleDelete(blog)}>remove</button>
         );
       }
     } catch (err) {
@@ -145,6 +145,7 @@ const App = () => {
           <div>
             username
             <input
+              id="username"
               type="text"
               value={username}
               onChange={handleUsername}
@@ -153,6 +154,7 @@ const App = () => {
           <div>
             password
             <input
+              id="password"
               type="text"
               value={password}
               onChange={handlePassword}
@@ -174,7 +176,7 @@ const App = () => {
         {user.name}
         {' '}
         logged in
-        <button type="submit" onClick={handleLogOut}>log-out</button>
+        <button id="log-out-button" type="submit" onClick={handleLogOut}>log-out</button>
       </p>
       {newBlogForm()}
       {blogs.sort(
