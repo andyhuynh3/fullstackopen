@@ -1,50 +1,45 @@
-const anecdotesAtStart = [
-  'If it hurts, do it more often',
-  'Adding manpower to a late software project makes it later!',
-  'The first 90 percent of the code accounts for the first 90 percent of the development time...The remaining 10 percent of the code accounts for the other 90 percent of the development time.',
-  'Any fool can write code that a computer can understand. Good programmers write code that humans can understand.',
-  'Premature optimization is the root of all evil.',
-  'Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it.',
-];
+import anecdoteService from '../services/anecdote';
 
-const getId = () => (100000 * Math.random()).toFixed(0);
-
-const asObject = (anecdote) => ({
-  content: anecdote,
-  id: getId(),
-  votes: 0,
-});
-
-const initialState = anecdotesAtStart.map(asObject);
-
-const reducer = (state = initialState, action) => {
+const anecdoteReducer = (state = [], action) => {
   switch (action.type) {
-    case 'VOTE': {
-      const { id } = action.data;
-      const anecdoteToChange = state.find((a) => a.id === id);
-      const changedAnecdote = {
-        ...anecdoteToChange,
-        votes: anecdoteToChange.votes + 1,
-      };
-      return state.map((anecdote) => (anecdote.id === id ? changedAnecdote : anecdote));
-    }
+    case 'VOTE': return action.updatedAnecdotes;
     case 'NEW_ANECDOTE': {
-      const { anecdote } = action.data;
-      return [...state, asObject(anecdote)];
+      return [...state, action.newAnecdote];
     }
+    case 'INITIALIZE_ANECDOTES': return action.anecdotes;
     default:
       return state;
   }
 };
 
-export const vote = (id) => ({
-  type: 'VOTE',
-  data: { id },
-});
+export const vote = (id) => async (dispatch, getState) => {
+  const { anecdotes } = getState();
+  console.log(anecdotes);
+  const anecdoteToUpdate = anecdotes.find((a) => a.id === id);
+  console.log(anecdoteToUpdate);
+  const updatedAnecdote = { ...anecdoteToUpdate, votes: anecdoteToUpdate.votes + 1 };
+  const updatedAnecdotes = anecdotes.map((anecdote) => (anecdote.id === id ? updatedAnecdote : anecdote));
+  await anecdoteService.updateAnecdote(id, updatedAnecdote);
+  dispatch({
+    type: 'VOTE',
+    updatedAnecdotes,
+  });
+};
 
-export const createAnecdote = (anecdote) => ({
-  type: 'NEW_ANECDOTE',
-  data: { anecdote },
-});
+export const createAnecdote = (anecdote) => async (dispatch) => {
+  const newAnecdote = await anecdoteService.createAnecdote(anecdote);
+  dispatch({
+    type: 'NEW_ANECDOTE',
+    newAnecdote,
+  });
+};
 
-export default reducer;
+export const initializeAnecdotes = () => async (dispatch) => {
+  const anecdotes = await anecdoteService.getAll();
+  return dispatch({
+    type: 'INITIALIZE_ANECDOTES',
+    anecdotes,
+  });
+};
+
+export default anecdoteReducer;
