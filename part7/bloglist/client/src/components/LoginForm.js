@@ -1,8 +1,9 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { TextField } from '@material-ui/core';
 import { setUsername, setPassword } from '../reducers/loginFormReducer';
 import { setNotification } from '../reducers/notificationReducer';
-import { login } from '../reducers/userReducer';
+import { login } from '../reducers/authReducer';
 
 const LoginForm = () => {
   const dispatch = useDispatch();
@@ -36,22 +37,22 @@ const LoginForm = () => {
 
   return (
     <div>
-      <h2>log in to application</h2>
+      <h2>Log in</h2>
       <form>
         <div>
-          username
-          <input
+          <TextField
             id="username"
             type="text"
+            label="username"
             value={username}
             onChange={handleUsername}
           />
         </div>
         <div>
-          password
-          <input
+          <TextField
             id="password"
-            type="text"
+            type="password"
+            label="password"
             value={password}
             onChange={handlePassword}
           />

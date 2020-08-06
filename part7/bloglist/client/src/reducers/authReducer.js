@@ -1,6 +1,6 @@
 import loginService from '../services/login';
 
-const userReducer = (state = null, action) => {
+const authReducer = (state = null, action) => {
   switch (action.type) {
     case 'LOGIN': {
       return action.data.user;
@@ -8,7 +8,7 @@ const userReducer = (state = null, action) => {
     case 'LOGOUT': {
       return null;
     }
-    case 'INITIALIZE_USER': {
+    case 'INITIALIZE_AUTHENTICATED_USER': {
       state = action.data.user;
       return state;
     }
@@ -16,11 +16,11 @@ const userReducer = (state = null, action) => {
   }
 };
 
-export const initializeUser = () => async (dispatch) => {
+export const initializeAuthenticatedUser = () => async (dispatch) => {
   const loggedInUser = window.localStorage.getItem('loggedInUser');
   if (loggedInUser) {
     dispatch({
-      type: 'INITIALIZE_USER',
+      type: 'INITIALIZE_AUTHENTICATED_USER',
       data: { user: JSON.parse(loggedInUser) },
     });
   }
@@ -44,4 +44,4 @@ export const logout = () => async (dispatch) => {
   });
 };
 
-export default userReducer;
+export default authReducer;

@@ -8,7 +8,7 @@ import BlogList from './components/BlogList';
 import {
   initializeBlogs,
 } from './reducers/blogReducer';
-import { initializeUser } from './reducers/userReducer';
+import { initializeAuthenticatedUser } from './reducers/authReducer';
 import LoginForm from './components/LoginForm';
 import Nav from './components/Nav';
 import {
@@ -16,23 +16,25 @@ import {
 } from 'react-router-dom';
 import Users from './components/Users';
 import User from './components/User';
-import { initializeUserBlogs } from './reducers/userBlogsReducer';
+import { initializeUsers } from './reducers/usersReducer';
+import Blog from './components/Blog';
+import Container from '@material-ui/core/Container';
 
 const App = () => {
   const dispatch = useDispatch();
-  const { user, userBlogs } = useSelector((state) => state);
+  const { authenticatedUser, users, blogs } = useSelector((state) => state);
 
   useEffect(() => {
     dispatch(initializeBlogs());
   }, []);
 
   useEffect(() => {
-    dispatch(initializeUser());
+    dispatch(initializeAuthenticatedUser());
   }, []);
 
   useEffect(() => {
     const fetchData = async () => {
-      await dispatch(initializeUserBlogs());
+      await dispatch(initializeUsers());
     };
     fetchData();
   }, [dispatch]);
@@ -40,25 +42,28 @@ const App = () => {
   const blogFormRef = useRef();
 
   const userMatch = useRouteMatch('/users/:id');
-  const userBlog = userMatch
-    ? userBlogs.find((userBlog) => userBlog.id === userMatch.params.id)
+  const user = userMatch
+    ? users.find((user) => user.id === userMatch.params.id)
     : null;
 
   return (
-    <div>
+    <Container>
       <Notification />
-      {user
+      {authenticatedUser
         && (
         <>
           <Nav />
           <Switch>
             <Route path="/users/:id">
-              <User userBlog={userBlog} />
+              <User user={user} />
             </Route>
             <Route path="/users">
               <Users />
             </Route>
-            <Route path="/">
+            <Route path="/blogs/:id">
+              <Blog />
+            </Route>
+            <Route path={['/', '/blogs']}>
               <Togglable buttonLabel="add new" ref={blogFormRef}>
                 <BlogForm blogFormRef={blogFormRef} />
               </Togglable>
@@ -67,8 +72,8 @@ const App = () => {
           </Switch>
         </>
         )}
-      {user === null && <LoginForm />}
-    </div>
+      {authenticatedUser === null && <LoginForm />}
+    </Container>
   );
 };
 

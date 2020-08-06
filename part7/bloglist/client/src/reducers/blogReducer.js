@@ -27,9 +27,9 @@ const blogReducer = (state = [], action) => {
 
 /* Interface with backend here */
 export const createBlog = (blog) => async (dispatch, getState) => {
-  const { user } = getState();
-  const newBlogData = await blogService.create(blog, user.token);
-  const newBlog = { ...newBlogData, visible: false, user: { username: user.username } };
+  const { authenticatedUser } = getState();
+  const newBlogData = await blogService.create(blog, authenticatedUser.token);
+  const newBlog = { ...newBlogData, visible: false, user: { username: authenticatedUser.username } };
   dispatch({
     type: 'NEW_BLOG',
     newBlog,
@@ -50,8 +50,9 @@ export const initializeBlogs = () => async (dispatch) => {
 };
 
 export const likeBlog = (id, updatedBlog) => async (dispatch) => {
-  const returnedBlogData = await blogService.update(id, updatedBlog);
-  const returnedBlog = { ...returnedBlogData, visible: true };
+  const { user } = updatedBlog;
+  const returnedBlogData = await blogService.update(id, { ...updatedBlog, user: user.id });
+  const returnedBlog = { ...returnedBlogData, user };
   dispatch({
     type: 'LIKE',
     data: {
@@ -61,10 +62,10 @@ export const likeBlog = (id, updatedBlog) => async (dispatch) => {
 };
 
 export const deleteBlog = (blog) => async (dispatch, getState) => {
-  const { user } = getState();
+  const { authenticatedUser } = getState();
   window.confirm(`Remove blog ${blog.title} by ${blog.author}?`);
   const { id } = blog;
-  await blogService.del(id, user.token);
+  await blogService.del(id, authenticatedUser.token);
   dispatch({
     type: 'DELETE_BLOG',
     id,

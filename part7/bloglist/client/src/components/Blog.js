@@ -1,17 +1,31 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { setVisible, likeBlog, deleteBlog } from '../reducers/blogReducer';
+import { useRouteMatch, useHistory } from 'react-router-dom';
+import {
+  likeBlog, deleteBlog,
+  initializeBlogs,
+} from '../reducers/blogReducer';
 
-const Blog = ({ blog }) => {
+const Blog = () => {
   const dispatch = useDispatch();
-  const { user } = useSelector((state) => state);
+  const history = useHistory();
+  const { authenticatedUser, blogs } = useSelector((state) => state);
+
+  useEffect(() => {
+    dispatch(initializeBlogs());
+  }, []);
+
+  const blogMatch = useRouteMatch('/blogs/:id');
+  const blog = blogMatch
+    ? blogs.find((blog) => blog.id === blogMatch.params.id)
+    : null;
 
   const handleLike = async () => {
     const {
       id, likes, author, title, url, user,
     } = blog;
     const updatedBlog = {
-      user: user.id,
+      user,
       likes: likes + 1,
       author,
       title,
@@ -22,12 +36,13 @@ const Blog = ({ blog }) => {
 
   const handleDelete = async () => {
     // eslint-disable-next-line no-alert
-    dispatch(deleteBlog(blog));
+    await dispatch(deleteBlog(blog));
+    history.push('/');
   };
 
   const removeButton = () => {
     try {
-      if (user.username === blog.user.username) {
+      if (authenticatedUser.username === blog.user.username) {
         return (
           <button id="remove-button" type="submit" onClick={handleDelete}>remove</button>
         );
@@ -37,46 +52,28 @@ const Blog = ({ blog }) => {
     }
   };
 
-  const blogStyle = {
-    paddingTop: 10,
-    paddingLeft: 2,
-    border: 'solid',
-    borderWidth: 1,
-    marginBottom: 5,
-  };
-
-  const toggleVisibility = () => {
-    dispatch(setVisible(blog.id));
-  };
-
-  const hideWhenVisible = { display: blog.visible ? 'none' : '' };
-  const showWhenVisible = { display: blog.visible ? '' : 'none' };
-
-  return (
-    <div style={blogStyle}>
-      <div style={hideWhenVisible} className="hidden">
-        {blog.title}
+  if (blog) {
+    return (
+      <div>
+        <h2>{blog.title}</h2>
+        <div><a href={blog.url} target="_blank">{blog.url}</a></div>
+        <div className="likes">
+          {blog.likes}
+          {' '}
+          likes
+          <button onClick={handleLike}>like</button>
+        </div>
+        added by
         {' '}
         {blog.author}
-        <button id="view-button" type="submit" onClick={toggleVisibility}>view</button>
+        <div>
+          {' '}
+          {removeButton()}
+        </div>
       </div>
-      <div style={showWhenVisible} className="show">
-        {blog.title}
-        {' '}
-        {blog.author}
-        <button id="hide-button" type="submit" onClick={toggleVisibility}>hide</button>
-        <br />
-        {blog.url}
-        <br />
-        <div className="likes">{blog.likes}</div>
-        <button id="like-button" type="submit" onClick={handleLike}>like</button>
-        <br />
-        {blog.username}
-        <br />
-        {removeButton()}
-      </div>
-    </div>
-  );
+    );
+  }
+  return <></>;
 };
 
 export default Blog;

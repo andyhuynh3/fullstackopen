@@ -1,13 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
+import { TextField, Button } from '@material-ui/core';
 import { setTitle, setAuthor, setUrl } from '../reducers/blogFormReducer';
 import { createBlog } from '../reducers/blogReducer';
 
 const BlogForm = ({ blogFormRef }) => {
   const dispatch = useDispatch();
   const {
-    title, author, url, visible,
+    title, author, url,
   } = useSelector((state) => state.newBlogInfo);
 
   const handleTitleChange = ({ target }) => {
@@ -36,9 +37,8 @@ const BlogForm = ({ blogFormRef }) => {
       <h2>create new</h2>
       <form onSubmit={addBlog}>
         <div>
-          <label htmlFor="title">title:</label>
-          <input
-            name="title"
+          <TextField
+            label="title"
             id="title"
             type="text"
             value={title}
@@ -46,9 +46,8 @@ const BlogForm = ({ blogFormRef }) => {
           />
         </div>
         <div>
-          <label htmlFor="author">author:</label>
-          <input
-            name="author"
+          <TextField
+            label="author"
             id="author"
             type="text"
             value={author}
@@ -56,16 +55,15 @@ const BlogForm = ({ blogFormRef }) => {
           />
         </div>
         <div>
-          <label htmlFor="url">url:</label>
-          <input
-            name="url"
+          <TextField
+            label="url"
             id="url"
             type="text"
             value={url}
             onChange={handleUrlChange}
           />
         </div>
-        <button id="create-blog" type="submit">create</button>
+        <Button id="create-blog" type="submit" variant="outlined" size="small" color="primary">create</Button>
       </form>
     </div>
   );
