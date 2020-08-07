@@ -1,15 +1,17 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useRouteMatch, useHistory } from 'react-router-dom';
+import { TextField, Button } from '@material-ui/core';
 import {
   likeBlog, deleteBlog,
-  initializeBlogs,
+  initializeBlogs, addComment,
 } from '../reducers/blogReducer';
 
 const Blog = () => {
   const dispatch = useDispatch();
   const history = useHistory();
   const { authenticatedUser, blogs } = useSelector((state) => state);
+  const [comment, setComment] = useState('');
 
   useEffect(() => {
     dispatch(initializeBlogs());
@@ -52,6 +54,13 @@ const Blog = () => {
     }
   };
 
+  const handleAddComment = async (event) => {
+    event.preventDefault();
+    dispatch(addComment(blog, comment));
+  };
+
+  console.log(blog);
+
   if (blog) {
     return (
       <div>
@@ -69,6 +78,20 @@ const Blog = () => {
         <div>
           {' '}
           {removeButton()}
+        </div>
+        <div>
+          <h3>comments</h3>
+          <form onSubmit={handleAddComment}>
+            <div><TextField type="text" label="add comment" onChange={({ target }) => setComment(target.value)} /></div>
+            <div>
+              <Button id="add-comment" type="submit" variant="outlined" size="small" color="primary">Add</Button>
+            </div>
+          </form>
+          <ul>
+            {blog.comments.map((comment) => (
+              <li key={comment.id}>{comment.content}</li>
+            ))}
+          </ul>
         </div>
       </div>
     );

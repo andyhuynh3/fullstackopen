@@ -1,4 +1,5 @@
 import blogService from '../services/blogs';
+import commentService from '../services/comments';
 import { setNotification } from './notificationReducer';
 
 /* Update the component state here */
@@ -20,6 +21,15 @@ const blogReducer = (state = [], action) => {
     }
     case 'SET_VISIBLE': {
       return state.map((blog) => ((blog.id === action.id) ? { ...blog, visible: !blog.visible } : blog));
+    }
+    case 'ADD_COMMENT': {
+      console.log(action.returnedComment);
+      const blog = state.find((b) => b.id === action.returnedComment.blog);
+      console.log(blog.comments);
+      blog.comments = [...blog.comments, { content: action.returnedComment.content, id: action.returnedComment.id }];
+      console.log(blog.comments);
+      state = [...state];
+      return state;
     }
     default: return state;
   }
@@ -72,10 +82,11 @@ export const deleteBlog = (blog) => async (dispatch, getState) => {
   });
 };
 
-export const setVisible = (id) => async (dispatch) => {
+export const addComment = (blog, comment) => async (dispatch) => {
+  const returnedComment = await commentService.create({ content: comment, blog_id: blog.id });
   dispatch({
-    type: 'SET_VISIBLE',
-    id,
+    type: 'ADD_COMMENT',
+    returnedComment,
   });
 };
 
