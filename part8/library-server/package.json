@@ -1,0 +1,23 @@
+{
+  "name": "library-server",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Andy Huynh",
+  "license": "MIT",
+  "scripts": {
+    "start": "cross-env NODE_ENV=production node index.js",
+    "dev": "cross-env NODE_ENV=development nodemon index.js"
+  },
+  "dependencies": {
+    "apollo-server": "^2.16.1",
+    "cross-env": "^7.0.2",
+    "graphql": "^15.3.0",
+    "uuid": "^8.3.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.4.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-plugin-import": "^2.22.0",
+    "nodemon": "^2.0.4"
+  }
+}
