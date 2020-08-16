@@ -5,7 +5,7 @@ import {
 import Select from 'react-select';
 import { ALL_AUTHORS, EDIT_AUTHOR } from '../queries';
 
-const Authors = ({ show }) => {
+const Authors = ({ show, token }) => {
   const { loading, data } = useQuery(ALL_AUTHORS);
   const [born, setBorn] = useState('');
   const [selectedOption, setSelectedOption] = useState('');
@@ -23,13 +23,35 @@ const Authors = ({ show }) => {
     });
   };
 
-  console.log(selectedOption);
+  const setBirthYear = () => {
+    if (token) {
+      const options = data.allAuthors.map((author) => ({ value: author.name, label: author.name }));
+      return (
+        <div>
+          <h2>Set birthyear</h2>
+          <form onSubmit={handleSubmit}>
+            <div>
+              name
+              {' '}
+              <Select options={options} onChange={(option) => setSelectedOption(option)} />
+            </div>
+            <div>
+              born
+              {' '}
+              <input type="text" id="name" onChange={({ target }) => setBorn(target.value)} />
+            </div>
+            <button type="submit">update author</button>
+          </form>
+        </div>
+      );
+    }
+    return <></>;
+  };
 
   if (show) {
     if (loading) {
       return null;
     }
-    const options = data.allAuthors.map((author) => ({ value: author.name, label: author.name }));
     return (
       <div>
         <h2>authors</h2>
@@ -53,22 +75,7 @@ const Authors = ({ show }) => {
             ))}
           </tbody>
         </table>
-        <div>
-          <h2>Set birthyear</h2>
-          <form onSubmit={handleSubmit}>
-            <div>
-              name
-              {' '}
-              <Select options={options} onChange={(option) => setSelectedOption(option)} />
-            </div>
-            <div>
-              born
-              {' '}
-              <input type="text" id="name" onChange={({ target }) => setBorn(target.value)} />
-            </div>
-            <button type="submit">update author</button>
-          </form>
-        </div>
+        {setBirthYear()}
       </div>
     );
   }
