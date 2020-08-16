@@ -1,5 +1,5 @@
 const {
-  ApolloServer, gql, UserInputError, AuthenticationError,
+  ApolloServer, gql, UserInputError, AuthenticationError, PubSub,
 } = require('apollo-server');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
@@ -8,6 +8,9 @@ const Book = require('./models/book');
 const User = require('./models/user');
 const config = require('./utils/config');
 const logger = require('./utils/logger');
+const author = require('./models/author');
+
+const pubsub = new PubSub();
 
 const JWT_SECRET = 'MY_SECRET';
 
@@ -62,6 +65,10 @@ const typeDefs = gql`
     me: User
   }
 
+  type Subscription {
+    bookAdded: Book!
+  }
+
   input AuthorInput {
     name: String!
     born: Int
@@ -112,17 +119,23 @@ const resolvers = {
       return booksToReturn;
     },
     allAuthors: async (root, args) => {
-      let updatedAuthors = [];
-      const authors = await Author.find({});
-      const books = await Book.find({}).populate('author');
-      // eslint-disable-next-line no-restricted-syntax
-      for (const author of authors) {
-        const bookCount = books.filter((book) => book.author.name === author.name).length;
-        updatedAuthors = [...updatedAuthors, { name: author.name, born: author.born, bookCount }];
-      }
-      return updatedAuthors;
+      const authors = await Author.find({}).populate('books');
+      const authorsWithBookCount = authors.map((author) => (
+        {
+          name: author.name,
+          bookCount: author.books.length,
+          born: author.born,
+          id: author._id,
+        }
+      ));
+      return authorsWithBookCount;
     },
     me: (root, args, context) => context.currentUser,
+  },
+  Subscription: {
+    bookAdded: {
+      subscribe: () => pubsub.asyncIterator(['BOOK_ADDED']),
+    },
   },
   Mutation: {
     addBook: async (root, args, context) => {
@@ -130,7 +143,6 @@ const resolvers = {
       if (!currentUser) {
         throw new AuthenticationError('not authenticated');
       }
-      const authorId = null;
       args.author = JSON.parse(JSON.stringify(args.author));
       const authors = await Author.find({});
       let matchingAuthor = authors.find((author) => author.name === args.author.name);
@@ -154,6 +166,9 @@ const resolvers = {
         });
       }
       book.author = matchingAuthor;
+      pubsub.publish('BOOK_ADDED', { bookAdded: book });
+      matchingAuthor.books = [...matchingAuthor.books, book._id];
+      matchingAuthor.save();
       return book;
     },
     editAuthor: async (root, args, context) => {
@@ -217,6 +232,7 @@ const server = new ApolloServer({
   },
 });
 
-server.listen().then(({ url }) => {
+server.listen().then(({ url, subscriptionsUrl }) => {
   console.log(`Server ready at ${url}`);
+  console.log(`Server ready at ${subscriptionsUrl}`);
 });
