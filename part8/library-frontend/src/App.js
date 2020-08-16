@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
+import {
+  useApolloClient,
+} from '@apollo/client';
 import Authors from './components/Authors';
 import Books from './components/Books';
 import NewBook from './components/NewBook';
 import LoginForm from './components/LoginForm';
 import Recommended from './components/Recommended';
+import { ALL_BOOKS } from './queries';
 
 const App = () => {
   const [page, setPage] = useState('authors');
   const [token, setToken] = useState(null);
+  const client = useApolloClient();
 
   useEffect(() => {
     const token = window.localStorage.getItem('library-user-token');
@@ -21,6 +26,21 @@ const App = () => {
     window.localStorage.removeItem('library-user-token');
   };
 
+  const updateCacheWith = (addedBook) => {
+    const includedIn = (set, object) => set.map((b) => b.id).includes(object.id);
+    const dataInStore = client.readQuery({ query: ALL_BOOKS, variables: { genre: null } });
+    console.log(dataInStore.allBooks);
+    console.log(addedBook);
+    if (!includedIn(dataInStore.allBooks, addedBook)) {
+      console.log('in here');
+      client.writeQuery({
+        query: ALL_BOOKS,
+        data: { ...dataInStore, allBooks: [...dataInStore.allBooks, addedBook] },
+        variables: { genre: null },
+      });
+    }
+  };
+
   const authDisplay = () => {
     if (token) {
       return (
@@ -30,7 +50,6 @@ const App = () => {
           <button onClick={() => setPage('recommended')}>recommended</button>
           <button onClick={() => handleLogout()}>logout</button>
         </>
-
       );
     }
     return <button onClick={() => setPage('login')}>login</button>;
@@ -55,6 +74,7 @@ const App = () => {
 
       <NewBook
         show={page === 'add'}
+        updateCacheWith={updateCacheWith}
       />
 
       <LoginForm

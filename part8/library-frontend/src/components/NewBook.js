@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { useMutation } from '@apollo/client';
-import { ADD_BOOK, ALL_BOOKS, ALL_AUTHORS } from '../queries';
+import { useMutation, useSubscription } from '@apollo/client';
+import {
+  ADD_BOOK, ALL_BOOKS, ALL_AUTHORS, BOOK_ADDED,
+} from '../queries';
 
-const NewBook = (props) => {
+const NewBook = ({ show, updateCacheWith }) => {
   const [title, setTitle] = useState('');
   const [author, setAuhtor] = useState('');
   const [published, setPublished] = useState('');
@@ -12,22 +14,19 @@ const NewBook = (props) => {
   const [addBook] = useMutation(ADD_BOOK, {
     refetchQueries: [{ query: ALL_AUTHORS }],
     update: (store, response) => {
-      console.log('in here');
-      const dataInStore = store.readQuery({ query: ALL_BOOKS, variables: { genre: null } });
-      console.log(dataInStore);
-
-      store.writeQuery({
-        query: ALL_BOOKS,
-        data: {
-          ...dataInStore,
-          allBooks: [...dataInStore.allBooks, response.data.addBook],
-        },
-        variables: { genre: null },
-      });
+      updateCacheWith(response.data.addBook);
     },
   });
 
-  if (!props.show) {
+  useSubscription(BOOK_ADDED, {
+    onSubscriptionData: ({ subscriptionData }) => {
+      const addedBook = subscriptionData.data.bookAdded;
+      window.alert(`Created new book ${addedBook.title} by ${addedBook.author.name}`);
+      updateCacheWith(addedBook);
+    },
+  });
+
+  if (!show) {
     return null;
   }
 
