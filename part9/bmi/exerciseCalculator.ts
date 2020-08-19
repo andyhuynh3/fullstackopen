@@ -74,3 +74,5 @@ try {
 } catch (e) {
   console.log('Error, something bad happened, mesage: ', e.message);
 }
+
+export default calculateExercises;
