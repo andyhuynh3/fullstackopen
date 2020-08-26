@@ -1,20 +1,15 @@
 import React from "react";
 import axios from "axios";
-import {
-  BrowserRouter as Router,
-  Route,
-  Link,
-  Switch,
-  useRouteMatch,
-} from "react-router-dom";
+import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
 import { Button, Divider, Header, Container } from "semantic-ui-react";
 
 import { apiBaseUrl } from "./constants";
 import { useStateValue } from "./state";
-import { Patient } from "./types";
+import { Patient, Diagnosis } from "./types";
 
 import PatientListPage from "./PatientListPage";
 import PatientInfo from "./components/PatientInfo";
+import { setPatientList, setDiagnosesList } from "./state/reducer";
 
 const App: React.FC = () => {
   const [{ currentPatient }, dispatch] = useStateValue();
@@ -26,12 +21,24 @@ const App: React.FC = () => {
         const { data: patientListFromApi } = await axios.get<Patient[]>(
           `${apiBaseUrl}/patients`
         );
-        dispatch({ type: "SET_PATIENT_LIST", payload: patientListFromApi });
+        dispatch(setPatientList(patientListFromApi));
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    const fetchDiagnosisList = async () => {
+      try {
+        const { data: diagnosisList } = await axios.get<Diagnosis[]>(
+          `${apiBaseUrl}/diagnoses`
+        );
+        dispatch(setDiagnosesList(diagnosisList));
       } catch (e) {
         console.error(e);
       }
     };
     fetchPatientList();
+    fetchDiagnosisList();
   }, [dispatch]);
 
   return (

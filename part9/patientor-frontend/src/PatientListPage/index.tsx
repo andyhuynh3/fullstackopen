@@ -8,7 +8,8 @@ import { Patient } from "../types";
 import { apiBaseUrl } from "../constants";
 import HealthRatingBar from "../components/HealthRatingBar";
 import { useStateValue } from "../state";
-import { Route, Link, useRouteMatch } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { addPatient, setCurrentPatient } from "../state/reducer";
 
 const PatientListPage: React.FC = () => {
   const [{ patients, currentPatient }, dispatch] = useStateValue();
@@ -29,7 +30,7 @@ const PatientListPage: React.FC = () => {
         `${apiBaseUrl}/patients`,
         values
       );
-      dispatch({ type: "ADD_PATIENT", payload: newPatient });
+      dispatch(addPatient(newPatient));
       closeModal();
     } catch (e) {
       console.error(e.response.data);
@@ -37,14 +38,14 @@ const PatientListPage: React.FC = () => {
     }
   };
 
-  const fetchPatient = (id: string) => async (event: any) => {
+  const fetchPatient = (id: string) => async (_event: any) => {
     // event.preventDefault();
     if (!currentPatient || currentPatient.id !== id)
       try {
         const patient = await axios.get<Patient>(
           `${apiBaseUrl}/patients/${id}`
         );
-        dispatch({ type: "SET_CURRENT_PATIENT", payload: patient.data });
+        dispatch(setCurrentPatient(patient.data));
       } catch (e) {
         console.error(e.response.data);
       }
