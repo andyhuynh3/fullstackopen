@@ -1,4 +1,10 @@
-import { NonSensitivePatient, NewPatient, Patient } from "../types";
+import {
+  NonSensitivePatient,
+  NewPatient,
+  Patient,
+  NewEntry,
+  Entry,
+} from "../types";
 import patientsData from "../../data/patients";
 import { v4 as uuidv4 } from "uuid";
 
@@ -28,4 +34,19 @@ const addPatient = (newPatient: NewPatient): Patient => {
   return addedPatient;
 };
 
-export default { getPatients, addPatient, getPatient };
+const addEntry = (patientId: string, entry: NewEntry): Entry => {
+  const addedEntry = {
+    id: uuidv4(),
+    ...entry,
+  };
+  const patient = patients.find((patient) => patient.id === patientId);
+  if (patient) {
+    patient.entries = [...patient?.entries, addedEntry];
+    patients = patients.map((p) => (p.id === patientId ? patient : p));
+    return addedEntry;
+  } else {
+    throw new Error(`Cannot find patient with ID ${patientId}`);
+  }
+};
+
+export default { getPatients, addPatient, getPatient, addEntry };
