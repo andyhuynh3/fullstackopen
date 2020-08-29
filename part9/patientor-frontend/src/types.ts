@@ -41,12 +41,12 @@ interface OccupationalHealthcareEntry extends BaseEntry {
   employerName: string;
 }
 
-interface Discharge {
+export interface Discharge {
   date: string;
   criteria: string;
 }
 
-interface HospitalEntry extends BaseEntry {
+export interface HospitalEntry extends BaseEntry {
   type: "Hospital";
   discharge: Discharge;
 }
@@ -70,6 +70,7 @@ export const SET_PATIENT_LIST = "SET_PATIENT_LIST";
 export const ADD_PATIENT = "ADD_PATIENT";
 export const SET_CURRENT_PATIENT = "SET_CURRENT_PATIENT";
 export const SET_DIAGNOSES_LIST = "SET_DIAGNOSES_LIST";
+export const ADD_ENTRY = "ADD_ENTRY";
 export interface SetPatientListAction {
   type: typeof SET_PATIENT_LIST;
   payload: Patient[];
@@ -78,6 +79,11 @@ export interface SetPatientListAction {
 export interface AddPatientAction {
   type: typeof ADD_PATIENT;
   payload: Patient;
+}
+
+export interface AddEntryAction {
+  type: typeof ADD_ENTRY;
+  payload: Entry;
 }
 
 export interface SetCurrentPatientAction {

@@ -1,4 +1,3 @@
-import { State } from "../types";
 import {
   Patient,
   SET_CURRENT_PATIENT,
@@ -10,13 +9,18 @@ import {
   AddPatientAction,
   SetPatientListAction,
   Diagnosis,
+  Entry,
+  ADD_ENTRY,
+  State,
+  AddEntryAction,
 } from "../types";
 
 export type Action =
   | SetCurrentPatientAction
   | AddPatientAction
   | SetPatientListAction
-  | SetDiagnosesListAction;
+  | SetDiagnosesListAction
+  | AddEntryAction;
 
 export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -57,6 +61,15 @@ export const reducer = (state: State, action: Action): State => {
           ),
         },
       };
+    case ADD_ENTRY:
+      const currentPatient = state.currentPatient;
+      if (currentPatient) {
+        currentPatient.entries = [...currentPatient?.entries, action.payload];
+      }
+      return {
+        ...state,
+        currentPatient,
+      };
     default:
       return state;
   }
@@ -82,4 +95,8 @@ export const setDiagnosesList = (
   diagnosisList: Diagnosis[]
 ): SetDiagnosesListAction => {
   return { type: SET_DIAGNOSES_LIST, payload: diagnosisList };
+};
+
+export const addEntry = (newEntry: Entry): AddEntryAction => {
+  return { type: ADD_ENTRY, payload: newEntry };
 };

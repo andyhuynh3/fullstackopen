@@ -6,14 +6,15 @@ import {
   Entry,
 } from "../types";
 import { useStateValue } from "../state";
+import { Segment, Icon } from "semantic-ui-react";
 
 const HealthCheckEntry: React.FC<HealthCheckEntryProps> = ({
   entry,
   diagnoses,
 }) => (
-  <div>
+  <Segment>
     <p>
-      {entry.date} {entry.type}
+      <b>{entry.date}</b> <Icon name="doctor" />
     </p>
     <p>{entry.description}</p>
     <ul>
@@ -23,18 +24,23 @@ const HealthCheckEntry: React.FC<HealthCheckEntryProps> = ({
         </li>
       ))}
     </ul>
-    {/* <p>{entry.specialist}</p>
-    <p>{entry.healthCheckRating}</p> */}
-  </div>
+    <p>
+      {Number(entry.healthCheckRating) === 0 ? (
+        <Icon name="heart" color="green" />
+      ) : (
+        <Icon name="heart" color="yellow" />
+      )}
+    </p>
+  </Segment>
 );
 
 const OccupationalHealthcareEntry: React.FC<OccupationalHealthcareEntryProps> = ({
   entry,
   diagnoses,
 }) => (
-  <div>
+  <Segment>
     <p>
-      {entry.date} {entry.type}
+      <b>{entry.date}</b> <Icon name="first aid" />
     </p>
     <p>{entry.description}</p>
     <ul>
@@ -45,13 +51,13 @@ const OccupationalHealthcareEntry: React.FC<OccupationalHealthcareEntryProps> = 
       ))}
     </ul>
     {/* <p>{entry.employerName}</p> */}
-  </div>
+  </Segment>
 );
 
 const HospitalEntry: React.FC<HospitalEntryProps> = ({ entry, diagnoses }) => (
-  <div>
+  <Segment>
     <p>
-      {entry.date} {entry.type}
+      <b>{entry.date}</b> <Icon name="hospital" />
     </p>
     <p>{entry.description}</p>
     <ul>
@@ -62,7 +68,7 @@ const HospitalEntry: React.FC<HospitalEntryProps> = ({ entry, diagnoses }) => (
       ))}
     </ul>
     {/* <p>{entry.discharge}</p> */}
-  </div>
+  </Segment>
 );
 
 const assertNever = (value: never): never => {
