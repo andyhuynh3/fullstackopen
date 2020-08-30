@@ -185,7 +185,7 @@ export const toNewOccupationalHealthcareEntry = (
 
 export const toNewHealthCheckEntry = (object: any): NewHealthCheckEntry => {
   return {
-    type: object.healthCheckRating,
+    type: object.type,
     description: parseDescription(object.description),
     date: parseDate(object.date),
     specialist: parseSpecialist(object.specialist),
