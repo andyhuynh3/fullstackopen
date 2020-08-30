@@ -3,21 +3,17 @@ import { Grid, Button } from "semantic-ui-react";
 import { Field, Formik, Form } from "formik";
 import { useStateValue } from "../state";
 
-import { TextField, DiagnosisSelection } from "./FormField";
-import { HospitalEntry } from "../types";
+import { TextField, DiagnosisSelection, NumberField } from "./FormField";
+import { HealthCheckEntry, HealthCheckRating } from "../types";
 
-/*
- * use type Patient, but omit id and entries,
- * because those are irrelevant for new patient object.
- */
-export type HospitalEntryFormValues = Omit<HospitalEntry, "id" | "type">;
+export type HealthCheckEntryFormValues = Omit<HealthCheckEntry, "id" | "type">;
 
 interface Props {
-  onSubmit: (values: HospitalEntryFormValues) => void;
+  onSubmit: (values: HealthCheckEntryFormValues) => void;
   onCancel: () => void;
 }
 
-export const AddHospitalEntryForm: React.FC<Props> = ({
+export const AddHealthCheckEntryForm: React.FC<Props> = ({
   onSubmit,
   onCancel,
 }) => {
@@ -25,18 +21,17 @@ export const AddHospitalEntryForm: React.FC<Props> = ({
   return (
     <Formik
       initialValues={{
-        type: "Hospital",
+        type: "HealthCheck",
         date: "",
         specialist: "",
         diagnosisCodes: [],
         description: "",
-        discharge: { date: "", criteria: "" },
+        healthCheckRating: HealthCheckRating.LowRisk,
       }}
       onSubmit={onSubmit}
       validate={(values) => {
         const requiredError = "Field is required";
         const errors: { [field: string]: string } = {};
-        const dischargeErrors: { [field: string]: string } = {};
         if (!values.description) {
           errors.description = requiredError;
         }
@@ -46,20 +41,10 @@ export const AddHospitalEntryForm: React.FC<Props> = ({
         if (!values.specialist) {
           errors.specialist = requiredError;
         }
-        if (!values.discharge.criteria) {
-          dischargeErrors.criteria = requiredError;
-        }
-        if (!values.discharge.date) {
-          dischargeErrors.date = requiredError;
-        }
-        if (Object.keys(dischargeErrors).length > 0) {
-          return { ...errors, discharge: { ...dischargeErrors } };
-        }
         return errors;
       }}
     >
       {({ isValid, dirty, setFieldValue, setFieldTouched }) => {
-        console.log(isValid);
         return (
           <Form className="form ui">
             <Field
@@ -86,16 +71,11 @@ export const AddHospitalEntryForm: React.FC<Props> = ({
               diagnoses={Object.values(diagnoses)}
             />
             <Field
-              label="Discharge Date"
-              placeholder="YYYY-MM-DD"
-              name="discharge.date"
-              component={TextField}
-            />
-            <Field
-              label="Discharge Criteria"
-              placeholder="Discharge Criteria"
-              name="discharge.criteria"
-              component={TextField}
+              label="healthCheckRating"
+              name="healthCheckRating"
+              component={NumberField}
+              min={0}
+              max={3}
             />
             <Grid>
               <Grid.Column floated="left" width={5}>
@@ -121,4 +101,4 @@ export const AddHospitalEntryForm: React.FC<Props> = ({
   );
 };
 
-export default AddHospitalEntryForm;
+export default AddHealthCheckEntryForm;

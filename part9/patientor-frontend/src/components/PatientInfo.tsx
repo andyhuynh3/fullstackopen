@@ -1,38 +1,64 @@
 import React from "react";
 import { Icon, Button } from "semantic-ui-react";
-import { Patient, HospitalEntry } from "../types";
+import { Patient, Entry } from "../types";
 import EntryDetails from "./EntryDetails";
 import axios from "axios";
 import { apiBaseUrl } from "../constants";
 import AddEntryModal from "../AddEntryModal";
 import { useStateValue } from "../state";
 import { addEntry } from "../state/reducer";
+import AddHospitalEntryForm from "../AddEntryModal/AddHospitalEntryForm";
+import AddHealthCheckEntryForm from "../AddEntryModal/AddHealthCheckEntryForm";
+import AddOccupationalHealthcareEntryForm from "../AddEntryModal/AddOccupationalHealthcareEntryForm";
 
 interface PatientProps {
   patient: Patient | null;
 }
 
 const PatientInfo = ({ patient }: PatientProps) => {
-  const [modalOpen, setModalOpen] = React.useState<boolean>(false);
+  const [hospitalModalOpen, setHospitalModalOpen] = React.useState<boolean>(
+    false
+  );
+  const [healthCheckModalOpen, setHealthCheckModalOpen] = React.useState<
+    boolean
+  >(false);
+  const [
+    occupationalHealthcareModalOpen,
+    setOccupationalHealthcareModalOpen,
+  ] = React.useState<boolean>(false);
   const [error, setError] = React.useState<string | undefined>();
   const [, dispatch] = useStateValue();
 
-  const openModal = (): void => setModalOpen(true);
+  const openHospitalModel = (): void => setHospitalModalOpen(true);
+  const openHealthCheckModal = (): void => setHealthCheckModalOpen(true);
+  const openOccupationalHealthcareModal = (): void =>
+    setOccupationalHealthcareModalOpen(true);
 
-  const closeModal = (): void => {
-    setModalOpen(false);
+  const closeHospitalModel = (): void => {
+    setHospitalModalOpen(false);
+    setError(undefined);
+  };
+  const closeHealthCheckModal = (): void => {
+    setHealthCheckModalOpen(false);
+    setError(undefined);
+  };
+  const closeOccupationalHealthcareModal = (): void => {
+    setOccupationalHealthcareModalOpen(false);
     setError(undefined);
   };
 
   if (patient) {
     const submitNewEntry = async (values: any) => {
       try {
-        const { data: newEntry } = await axios.post<HospitalEntry>(
+        console.log(values);
+        const { data: newEntry } = await axios.post<Entry>(
           `${apiBaseUrl}/patients/${patient.id}/entries`,
           values
         );
         dispatch(addEntry(newEntry));
-        closeModal();
+        closeHospitalModel();
+        closeHealthCheckModal();
+        closeOccupationalHealthcareModal();
       } catch (e) {
         console.error(e.response.data);
         setError(e.response.data.error);
@@ -58,12 +84,45 @@ const PatientInfo = ({ patient }: PatientProps) => {
           </div>
         ))}
         <AddEntryModal
-          modalOpen={modalOpen}
-          onSubmit={submitNewEntry}
+          modalOpen={hospitalModalOpen}
           error={error}
-          onClose={closeModal}
+          onClose={closeHospitalModel}
+          child={
+            <AddHospitalEntryForm
+              onSubmit={submitNewEntry}
+              onCancel={closeHospitalModel}
+            />
+          }
         />
-        <Button onClick={() => openModal()}>Add New Patient</Button>
+        <AddEntryModal
+          modalOpen={healthCheckModalOpen}
+          error={error}
+          onClose={closeHealthCheckModal}
+          child={
+            <AddHealthCheckEntryForm
+              onSubmit={submitNewEntry}
+              onCancel={closeHealthCheckModal}
+            />
+          }
+        />
+        <AddEntryModal
+          modalOpen={occupationalHealthcareModalOpen}
+          error={error}
+          onClose={closeHealthCheckModal}
+          child={
+            <AddOccupationalHealthcareEntryForm
+              onSubmit={submitNewEntry}
+              onCancel={closeOccupationalHealthcareModal}
+            />
+          }
+        />
+        <Button onClick={() => openHospitalModel()}>Add Hospital Entry</Button>
+        <Button onClick={() => openHealthCheckModal()}>
+          Add Health Check Entry
+        </Button>
+        <Button onClick={() => openOccupationalHealthcareModal()}>
+          Add Occupational Healthcare Entry
+        </Button>
       </div>
     );
   }
